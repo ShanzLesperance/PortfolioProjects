@@ -1,0 +1,171 @@
+https://www.kaggle.com/datasets/thedevastator/global-video-game-sales
+
+
+
+
+--Date Exploration and processing
+
+SELECT MIN(year) FROM dbo.video_games_sales$;
+--
+
+SELECT MAX(year) FROM dbo.video_games_sales$;
+
+SELECT TOP 20 *
+FROM dbo.video_games_sales$;
+
+SELECT TOP 20 publisher 
+FROM dbo.video_games_sales$;
+
+SELECT column_name, data_type, character_maximum_length, is_nullable
+FROM information_schema.columns
+WHERE table_name = 'video_games_sales$';
+
+--Checking if there are nulls
+
+SELECT COUNT(*) as num_nulls
+FROM dbo.video_games_sales$
+WHERE year IS NULL;
+
+SELECT COUNT(*) as num_nulls
+FROM dbo.video_games_sales$
+WHERE publisher NULL
+
+SELECT SUM(CASE WHEN rank IS NULL THEN 1 ELSE 0 END) as num_nulls
+FROM dbo.video_games_sales$;
+
+--Finding All nulls at once
+
+SELECT 
+    COUNT(*) as total_rows,
+    SUM(CASE WHEN rank IS NULL THEN 1 ELSE 0 END) as rank_nulls,
+    SUM(CASE WHEN name IS NULL THEN 1 ELSE 0 END) as name_nulls,
+	SUM(CASE WHEN platform IS NULL THEN 1 ELSE 0 END) as platform_nulls,
+	SUM(CASE WHEN year IS NULL THEN 1 ELSE 0 END) as year_nulls,
+	SUM(CASE WHEN genre IS NULL THEN 1 ELSE 0 END) as genre_nulls,
+	SUM(CASE WHEN publisher IS NULL THEN 1 ELSE 0 END) as publisher_nulls,
+	SUM(CASE WHEN na_sales IS NULL THEN 1 ELSE 0 END) as nasales_nulls,
+	SUM(CASE WHEN eu_sales IS NULL THEN 1 ELSE 0 END) as eusales_nulls,
+	SUM(CASE WHEN jp_sales IS NULL THEN 1 ELSE 0 END) as jpsales_nulls,
+	SUM(CASE WHEN other_sales IS NULL THEN 1 ELSE 0 END) as othersales_nulls,
+	SUM(CASE WHEN global_sales IS NULL THEN 1 ELSE 0 END) as globalsales_nulls
+FROM dbo.video_games_sales$;
+
+--Checking for duplicates in video game names
+
+SELECT name, COUNT(*)
+FROM dbo.video_games_sales$
+GROUP BY name
+HAVING COUNT(*) >1
+
+--We can see that names are duplicated when more additions are added to the series
+
+--Analysis
+
+--First I want to find which Publisher produces the most global sales
+
+SELECT*
+FROM dbo.video_games_sales$
+WHERE global_sales > 4
+ORDER BY publisher DESC
+
+
+SELECT*
+FROM dbo.video_games_sales$
+WHERE global_sales > 9
+ORDER BY global_sales DESC
+
+SELECT publisher, SUM(global_sales) AS total_sales
+FROM dbo.video_games_sales$
+WHERE global_sales > 9
+GROUP BY publisher
+ORDER BY total_sales DESC
+
+--Nintendo is the highest ranked publisher. Now I want to see which games are ranked the highest for Nintendo
+
+SELECT TOP 50 name
+FROM dbo.video_games_sales$
+WHERE publisher = 'Nintendo'
+ORDER BY global_sales DESC;
+
+--I see a lot of Pokemon games on the list so now I want to check global sales for Pokemon games 
+
+SELECT*
+FROM dbo.video_games_sales$
+WHERE publisher = 'Nintendo' AND name LIKE '%Pokemon%'
+ORDER BY global_sales DESC;
+
+--Now I want to see Mario Games since there are multiple of those as well
+
+SELECT*
+FROM dbo.video_games_sales$
+WHERE publisher = 'Nintendo' AND name LIKE '%Mario%'
+ORDER BY global_sales DESC;
+
+--Pokemon compared to Mario global Sales
+
+SELECT*
+FROM dbo.video_games_sales$
+WHERE publisher = 'Nintendo' AND name LIKE '%Mario%' OR name LIKE '%Pokemon%'
+ORDER BY global_sales DESC;
+
+--Now that I have explored those I want to see global sales for next best Publisher
+
+SELECT publisher, SUM(global_sales) AS total_sales
+FROM dbo.video_games_sales$
+WHERE global_sales > 9
+GROUP BY publisher
+ORDER BY total_sales DESC
+
+--Activision is Second on the list. Now I am going to see what the top games are based on Global Sales
+
+SELECT*
+FROM dbo.video_games_sales$
+WHERE publisher = 'Activision'
+ORDER BY global_sales DESC
+
+SELECT TOP 10 name, global_sales
+FROM dbo.video_games_sales$
+WHERE publisher = 'Activision'
+ORDER BY global_sales DESC
+
+--Now I am going to see what years have the highest game sales for each platform
+
+SELECT TOP 100 *
+FROM dbo.video_games_sales$
+ORDER BY CASE WHEN year IS NULL THEN 1 ELSE 0 END ASC, global_sales DESC;
+
+
+--Now I am going to explore the top sales per genre
+
+SELECT genre
+FROM dbo.video_games_sales$
+
+SELECT*
+FROM dbo.video_games_sales$
+ORDER BY genre, global_sales DESC
+
+SELECT*
+FROM dbo.video_games_sales$
+WHERE genre = 'Action'
+ORDER BY rank 
+
+SELECT genre
+FROM dbo.video_games_sales$
+
+--Lets check other genres
+
+SELECT*
+FROM dbo.video_games_sales$
+WHERE genre = 'Role-PLaying'
+ORDER BY global_sales DESC
+--Pokemon Red/Blue
+
+SELECT*
+FROM dbo.video_games_sales$
+WHERE genre = 'Sports'
+ORDER BY global_sales DESC
+--WiiSPorts
+
+SELECT name, genre, global_sales
+FROM dbo.video_games_sales$
+ORDER BY global_sales DESC
